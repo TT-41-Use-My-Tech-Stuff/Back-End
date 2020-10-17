@@ -2,9 +2,10 @@ const router = require('express').Router()
 const knex = require("knex")
 const config = require("../knexfile")
 const {getRentals, getRental, updateRental, removeRental, postRental} = require("../user-rentals/userRentalsModel")
+const authenticate = require('../auth/authMiddleware')
 
 
-router.get("/",  async (req,res) => {
+router.get("/",  authenticate(), async (req,res) => {
     try {
         const rentals = await getRentals()
         res.status(200).json(rentals)
@@ -12,7 +13,7 @@ router.get("/",  async (req,res) => {
         res.status(500).json({ message: 'Could not retrieve the list of rentals' }); 
     }
 })
-router.get('/:id', async(req, res) => {
+router.get('/:id', authenticate(), async(req, res) => {
     try {
         const id = Number(req.params.id)
         const rental = await getRental(id)
@@ -22,7 +23,7 @@ router.get('/:id', async(req, res) => {
         res.status(404).json({ message: 'Rental not found' })
     }
 })
-router.put('/edit/:id', async (req, res) => {
+router.put('/edit/:id', authenticate(), async (req, res) => {
     try{
         const id = Number(req.params.id)
         const changes = req.body
@@ -33,7 +34,7 @@ router.put('/edit/:id', async (req, res) => {
         res.status(500).json({message: 'Could not update the account'});
     }
 })
-router.post('/add', async (req, res) => {
+router.post('/add', authenticate(), async (req, res) => {
     try {
         if (req.body){
             const {user_id,item_name,item_description,img_url,category,rate} = req.body
@@ -48,7 +49,7 @@ router.post('/add', async (req, res) => {
     }
 
 })
-router.delete('/delete/:id', async(req, res) => {
+router.delete('/delete/:id', authenticate(), async(req, res) => {
     
     try {
         const id = Number(req.params.id)
