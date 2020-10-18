@@ -20,12 +20,12 @@ Follow these steps to use the endpoints:
 - **[POST]** \* to `/api/register`: returns a sucess message with the username. Pass in the following credentials as the `body` of the request:
   `{ email:testing@user.com, username: 'usertesting', password: 'password' }`
 
-- Success Response : { "message": "testing@user.com added" }
+- Success Response : `{ "message": "testing@user.com added" }`
 
 - **[POST]** \* to `/api/login`: returns a token to be added to the header of all other requests. Pass in the following credentials as the `body` of the request:
   `{ username: 'usertesting', password: 'password' }`
 
-- Success Respone : { "id": 6, "message": "Welome usertesting","token": "**\***" }
+- Success Respone : `{ "id": 6, "message": "Welome usertesting","token": "**\***" }`
 
 ### Task 2: Data Endpoints
 
@@ -48,12 +48,12 @@ Sample Response:
 - **[POST]** to `/api/rentals/add`: creates a new rental object. Pass the rental item as the `body` of the request (the second argument passed to `axios.post`).
   `{ user_id, item_name, item_description, img_url, category, rate }`
 
-- Success Response : { "message": "rental added successfully" }
+- Success Response : `{ "message": "rental added successfully" }`
 
 - **[PUT]** to `/api/rentals/:id`: updates the rental item using the `id` passed as part of the URL. Send the rental item object with the updated information as the `body` of the request (the second argument passed to `axios.put`).
 
-- Success Response : { "message": "rental successfully updated!" }
+- Success Response : `{ "message": "rental successfully updated!" }`
 
 - **[DELETE]** to `/api/rentals/:id`: removes the rental item using the `id` passed as part of the URL .
 
-- Sucess Response : { "message": "Rental with id of 4 deleted!" }
+- Sucess Response : `{ "message": "Rental with id of 4 deleted!" }`
