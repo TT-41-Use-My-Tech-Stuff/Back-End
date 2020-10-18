@@ -29,7 +29,7 @@ Follow these steps to use the endpoints:
 
 ### Task 2: Data Endpoints
 
-### Registering/Login Endpoints
+### Data Endpoints
 
 - **[GET]** to `/api/rentals`: returns the list of rentals and the information on each item.
 
