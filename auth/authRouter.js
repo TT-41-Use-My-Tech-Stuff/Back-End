@@ -1,77 +1,77 @@
-const router = require('express').Router();
-const bcryptjs = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const Users = require('../users/userModel');
-const { validateUser } = require('../users/validateUser');
+const router = require('express').Router()
+const knex = require("knex")
+const config = require("../knexfile")
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 require("dotenv").config()
 
-router.post('/register', (req, res) => {
-   const credentials = req.body;
 
-   if(validateUser(credentials)){
-    const rounds = process.env.BCRYPT_ROUNDS || 8;
+const {add, getAllUsers, findBy} = require("./authModel")
 
-    //hash the pw
-    const hash = bcryptjs.hashSync(credentials.password, rounds);
-
-    credentials.password = hash;
-
-    // save the user to the db
-        Users.add(credentials)
-        .then(user => {
-            res.status(201).json({ data: user });
+router.get("/users", async (req,res,next) => {
+    getAllUsers()
+        .then(users => {
+            res.status(200).json(users)
         })
         .catch(err => {
-            res.status(500).json({ message: 'Failed saving user'});
-        });
-   } else {
-       res.status(400).json({ 
-           message: 'Please provide email, username, and password' });
-   };
-});
+            console.log(err)
+            res.status(401).json({message: "invalid credentials"})
+        })
+})
+
+router.post("/register", async (req,res,next) => {
+
+    try {
+        if(req.body){
+            const { email, username, password} = req.body
+            const user = {
+                username,
+                email,
+                password: await bcrypt.hash(password, 6)
+      }
+      await add(user)
+      res.status(201).json({message: `${email} added`})
+        }
+    } catch(err) {
+        next(err)
+    }
+})
 
 router.post('/login', (req, res) => {
-  const { username, password } = req.body;
-
-  if(validateUser(req.body)) {
-    Users.findBy({ username: username })
-    .then(([user]) => {
-        // comparing the hashed pw stored in db
-        if(user && bcryptjs.compareSync(password, user.password)) {
-            const token = getJwt(user);
-
-            res.status(200).json({
-                message: "You are now logged in",
-                token
+    //Login user
+    let { username, password } = req.body;
+        findBy({ username }).first()
+        .then(user => {
+            if (user && bcrypt.compareSync(password, user.password)) {
+                const token = generateToken(user);
+                delete user.password
+                res.status(200).json({
+                    id: user.id,
+                    message: `Welome ${username}`,
+                    token,
+                });
+            } else {
+                res.status(401).json({
+                    message: "Invalid Credentials"
+                })
+            }
+        })
+        .catch(({ message }) => {
+            res.status(500).json({
+                message
             });
-        } else {
-            res.status(401).json({ 
-                message: "Invalid credentials"
-            });
-        }
-    })
-    .catch(err => {
-        res.status(500).json({mesasge: err.message })
-    });
-  } else {
-    res.status(400).json({ 
-        message: 'Please provide username and password'
-    });
-  }
+        })
 });
-
-function getJwt(user) {
+function generateToken(user) {
+    //Header payload and verify signature
     const payload = {
-        username: user.username
+        username: user.username,
     };
-
-    const jwtOptions = {
-        expiresIn: '8h',
+    //Token expiration
+    const options = {
+        expiresIn: "1d"
     }
-
-    return jwt.sign(payload, jwtSecret, jwtOptions)
-};
-
+    return jwt.sign(payload, process.env.JWT_SECRET, options);
+}
 
 module.exports = router;

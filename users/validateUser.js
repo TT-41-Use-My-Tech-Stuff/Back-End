@@ -3,5 +3,5 @@ module.exports = {
   };
   
   function validateUser(user) {
-    return Boolean(user.username && user.password && typeof user.password === "string");
+    return Boolean(user.username && user.password && user.email && typeof user.password === "string");
   }
